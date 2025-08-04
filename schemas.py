@@ -1,3 +1,4 @@
+from typing import List, Optional
 from pydantic import BaseModel, EmailStr
 
 
@@ -19,7 +20,13 @@ class CreateProduct(BaseModel):
     price: int
     description:str
     quantity:int
+    tag_ids: Optional[List[int]] = []
     # seller_id: int
+
+class TagCreate(BaseModel):
+    name: str
+
+
 
 
 

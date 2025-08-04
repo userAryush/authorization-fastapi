@@ -1,7 +1,7 @@
 from fastapi import FastAPI, HTTPException, status, Depends
 from database import SessionLocal, Base, engine
-from models import User, Product
-from schemas import CreateUser, LoginUser, CreateProduct
+from models import User, Product, Tag
+from schemas import CreateUser, LoginUser, CreateProduct, TagCreate
 from sqlalchemy.orm import Session
 from auth import hash_password, verify_password, create_access_token
 from dependencies import get_current_user
@@ -16,10 +16,6 @@ app.add_middleware(SimpleMiddleware)
 app.add_middleware(TimerMiddleware)
 
 
-
-
-
-
 @app.post("/signup/",status_code=status.HTTP_201_CREATED)
 def create_user(user: CreateUser, db: Session=Depends(get_db)):
     if user.role not in ['customer','seller']:
@@ -32,12 +28,12 @@ def create_user(user: CreateUser, db: Session=Depends(get_db)):
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Username already exists")
 
     
-    hashed_password = hash_password(user.password)
+    user["password"] = hash_password(user.password)
   
-    user["password"] = hashed_password
     new_user = User(**user)
     db.add(new_user)
     db.commit()
+    db.refresh(new_user)
     
     return {"msg" : f"{user.role} created!", "username" : user.username, "email": user.email}
 
@@ -74,10 +70,21 @@ def add_product(product: CreateProduct, db:Session=Depends(get_db), current_user
     new_product = Product(**product)
     db.add(new_product)
     db.commit()
+    db.refresh(new_product)
     
     return {"msg" : f"{product.name} added!", "quantity" : product.quantity, "price": product.price, "description":product.description, "supplier_username":current_user.username}
 
 
+@app.post("/tags/")
+def create_tag(tag: TagCreate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    if current_user.role != "seller":
+
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Only seller can add")
+    new_tag = Tag(**tag.dict())
+    db.add(new_tag)
+    db.commit()
+    db.refresh(new_tag)
+    return new_tag
 
 
 
