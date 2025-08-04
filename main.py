@@ -3,7 +3,7 @@ from database import SessionLocal, Base, engine
 from models import User
 from schemas import CreateUser, LoginUser
 from sqlalchemy.orm import Session
-from auth import hash_password, verify_password
+from auth import hash_password, verify_password, create_access_token
 
 
 
@@ -49,7 +49,13 @@ def log_user(user:LoginUser, db: Session=Depends(get_db)):
     if not verify_password(user.password, existing_user.password):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Incorrect Password")
     
-    return {"msg":f"{existing_user.username}, you are logged successfully!!"}
+    
+    # create token
+
+    token = create_access_token({"sub":existing_user.email, "role":existing_user.role, "username":existing_user.name})
+    token_detail = "Add this token in the header of your request as Authorization : Bearer <token>"
+    return {"msg":f"{existing_user.username}, you are logged successfully!!", "token_type": "Bearer", "token": token, "token_detail": token_detail}
+
 
 
         
