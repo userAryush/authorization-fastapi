@@ -1,5 +1,5 @@
 from pydantic import BaseModel, EmailStr
-from pydantic_settings import BaseSettings
+
 
 class CreateUser(BaseModel):
     
@@ -8,17 +8,21 @@ class CreateUser(BaseModel):
     role : str = 'customer'
     password : str
     
+    model_config = {"extra" : "forbid"}
+    
 class LoginUser(BaseModel):
     email : EmailStr
     password : str
-    
-class Settings(BaseSettings):
-    
-    SECRET_KEY :str
-    ALGORITHM : str 
-    ACCESS_TOKEN_EXPIRE_MINUTES : int
-    
-    model_config = {"env_file" : ".env"}
+
+class CreateProduct(BaseModel):
+    name:str
+    price: int
+    description:str
+    quantity:int
+    # seller_id: int
+
+
+
     
 
     

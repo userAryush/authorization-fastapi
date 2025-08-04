@@ -1,8 +1,9 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
+from config import Settings 
 
-
-DATABASE_URL = 'mysql+pymysql://root:Aryush%401234K@localhost/authwork' 
+setting = Settings()
+DATABASE_URL = setting.DATABASE_URL
 
 engine = create_engine(DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, bind=engine)
